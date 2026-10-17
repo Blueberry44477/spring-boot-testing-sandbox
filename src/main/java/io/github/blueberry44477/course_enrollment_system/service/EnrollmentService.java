@@ -93,11 +93,10 @@ public class EnrollmentService {
     }
 
     @Transactional
-    public void complete(Long id) {
-        Enrollment enrollment = enrollmentRepository.findById(id).orElse(null);
-        if (enrollment == null) {
-            throw new IllegalArgumentException("Enrollment not found");
-        }
+    public Enrollment complete(Long id) {
+        Enrollment enrollment = enrollmentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
+        
         if (enrollment.getStatus() != EnrollmentStatus.ENROLLED) {
             throw new EnrollmentRejectedException("Cannot complete an enrollment that is not ENROLLED");
         }
@@ -105,10 +104,12 @@ public class EnrollmentService {
         if (affected == 0) {
             throw new EnrollmentRejectedException("Enrollment not found or not in ENROLLED status");
         }
+        enrollment.setStatus(EnrollmentStatus.COMPLETED);
+        return enrollment;
     }
 
     @Transactional
-    public void cancel(Long id, int daysBeforeStart) {
+    public Enrollment cancel(Long id, int daysBeforeStart) {
         Enrollment enrollment = enrollmentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Enrollment not found"));
        
@@ -121,5 +122,8 @@ public class EnrollmentService {
         if (affected == 0) {
             throw new EnrollmentRejectedException("Enrollment not found or not in ENROLLED status");
         }
+        enrollment.setStatus(EnrollmentStatus.CANCELLED);
+        enrollment.setRefund(refund);
+        return enrollment;
     }
 }

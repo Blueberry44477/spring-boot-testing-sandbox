@@ -31,5 +31,6 @@ spring:
       lifecycle-management: start-and-stop
 
 policy:
-  url: http://some_real_service
+  url: https://some_real_service
   timeout: 2s
+  mock: true

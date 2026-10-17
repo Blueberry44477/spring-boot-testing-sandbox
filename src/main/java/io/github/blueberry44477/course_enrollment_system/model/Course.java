@@ -3,6 +3,7 @@ package io.github.blueberry44477.course_enrollment_system.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Data
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @Table(name = "courses")
+@Getter
 public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

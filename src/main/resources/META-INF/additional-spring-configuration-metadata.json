@@ -8,5 +8,10 @@
     "name": "policy.timeout",
     "type": "java.lang.String",
     "description": "A description for 'policy.timeout'"
+  },
+  {
+    "name": "policy.mock",
+    "type": "java.lang.Boolean",
+    "description": "Enable mock enrollment policy for testing and local development"
   }
 ]}
