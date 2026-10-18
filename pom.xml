@@ -141,6 +141,29 @@
 			<version>1.0-alpha-15</version>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- Performance Testing -->
+		<!-- Source: https://mvnrepository.com/artifact/io.gatling/gatling-core-java -->
+		<dependency>
+			<groupId>io.gatling</groupId>
+			<artifactId>gatling-core-java</artifactId>
+			<version>3.16.0</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Source: https://mvnrepository.com/artifact/io.gatling/gatling-http-java -->
+		<dependency>
+			<groupId>io.gatling</groupId>
+			<artifactId>gatling-http-java</artifactId>
+			<version>3.16.0</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Source: https://mvnrepository.com/artifact/io.gatling.highcharts/gatling-charts-highcharts -->
+		<dependency>
+			<groupId>io.gatling.highcharts</groupId>
+			<artifactId>gatling-charts-highcharts</artifactId>
+			<version>3.16.0</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -225,7 +248,26 @@
 				</executions>
 			</plugin>
 
-			
+			<!-- Source: https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-resources-plugin -->
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.5.0</version>
+			</plugin>
+
+			<!-- Source: https://mvnrepository.com/artifact/io.gatling/gatling-maven-plugin -->
+			<plugin>
+				<groupId>io.gatling</groupId>
+				<artifactId>gatling-maven-plugin</artifactId>
+				<version>4.21.12</version>
+				<executions>
+					<execution>
+						<phase>test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>
