@@ -33,4 +33,4 @@ spring:
 policy:
   url: https://some_real_service
   timeout: 2s
-  mock: true
+  mock: false
