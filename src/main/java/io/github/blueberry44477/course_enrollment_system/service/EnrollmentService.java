@@ -37,7 +37,7 @@ public class EnrollmentService {
         } else if (level == 2) {
             return entryScore >= 60;
         } else if (level == 3) {
-            return entryScore >= 80 && age >= 18;
+            return entryScore >= 80 && age <= 18;
         }
         return false; // Invalid level or unhandled
     }
