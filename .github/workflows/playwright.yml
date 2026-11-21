@@ -8,11 +8,54 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: mydatabase
+          MYSQL_USER: myuser
+          MYSQL_PASSWORD: secret
+          MYSQL_ROOT_PASSWORD: verysecret
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -u root -pverysecret"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
     defaults:
       run:
         working-directory: e2e/playwright
     steps:
     - uses: actions/checkout@v4
+    - uses: actions/setup-java@v4
+      with:
+        java-version: '25'
+        distribution: 'temurin'
+        cache: 'maven'
+    - name: Build application
+      working-directory: .
+      run: |
+        chmod +x mvnw
+        ./mvnw -B package -DskipTests
+    - name: Start application
+      working-directory: .
+      env:
+        SPRING_DOCKER_COMPOSE_ENABLED: false
+        SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/mydatabase
+        SPRING_DATASOURCE_USERNAME: myuser
+        SPRING_DATASOURCE_PASSWORD: secret
+      run: |
+        nohup java -jar target/*.jar > app.log 2>&1 &
+        for i in $(seq 1 30); do
+          if curl -sf http://localhost:8080/actuator/health >/dev/null; then
+            echo "Application is ready"
+            exit 0
+          fi
+          sleep 2
+        done
+        cat app.log
+        exit 1
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
