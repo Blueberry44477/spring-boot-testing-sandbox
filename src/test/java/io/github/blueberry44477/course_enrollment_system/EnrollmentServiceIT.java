@@ -54,6 +54,7 @@ public class EnrollmentServiceIT {
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
         registry.add("policy.url", wiremock::getBaseUrl);
+        registry.add("policy.mock", () -> "false");
     }
 
     @BeforeAll
