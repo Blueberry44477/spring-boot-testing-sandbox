@@ -43,14 +43,15 @@ public class ApiExceptionHandler {
                 .body(new ApiError("METHOD_NOT_ALLOWED", "Метод не підтримується"));
     }
 
-    @ExceptionHandler(org.springframework.dao.DataAccessException.class)
-    public ResponseEntity<ApiError> dataAccess(org.springframework.dao.DataAccessException ex) {
-        Throwable cause = ex;
-        while (cause != null) {
-            if (cause instanceof SQLException sql) return database(sql);
-            cause = cause.getCause();
-        }
-        return error(500, "DATABASE_ERROR", "Помилка роботи з БД");
+    @ExceptionHandler({org.springframework.dao.DataAccessException.class, jakarta.persistence.PersistenceException.class})
+    public ResponseEntity<java.util.Map<String, String>> dataAccess(Exception ex) {
+        var trace = new java.io.StringWriter();
+        ex.printStackTrace(new java.io.PrintWriter(trace));
+        return ResponseEntity.status(500).body(java.util.Map.of(
+                "code", "DATABASE_ERROR",
+                "message", ex.toString(),
+                "trace", trace.toString()
+        ));
     }
 
     @ExceptionHandler(SQLException.class)

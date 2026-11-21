@@ -1,9 +1,11 @@
 package io.github.blueberry44477.course_enrollment_system.controller;
 
 import java.net.URI;
-import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 
 import io.github.blueberry44477.course_enrollment_system.dto.EnrollmentRequest;
+import io.github.blueberry44477.course_enrollment_system.dto.EnrollmentStatus;
 import io.github.blueberry44477.course_enrollment_system.exception.ResourceNotFoundException;
 import io.github.blueberry44477.course_enrollment_system.model.Enrollment;
 import io.github.blueberry44477.course_enrollment_system.repository.EnrollmentRepository;
@@ -20,6 +22,7 @@ public class EnrollmentController {
     private final EnrollmentRepository repository;
 
     public record CancelInput(int daysBeforeStart) {}
+    public record EditInput(String reference, Long total, Long prepaid, EnrollmentStatus status) {}
 
     @PostMapping
     public ResponseEntity<Enrollment> create(@RequestBody EnrollmentRequest input) {
@@ -40,5 +43,29 @@ public class EnrollmentController {
     @PostMapping("/{id}/cancel")
     public Enrollment cancel(@PathVariable long id, @RequestBody CancelInput input) {
         return service.cancel(id, input.daysBeforeStart());
+    }
+
+    @GetMapping("/search")
+    public List<Map<String, Object>> search(@RequestParam String reference) {
+        return repository.searchByReference(reference);
+    }
+
+    // Expected only to change reference, but changes other fields also.
+    @PatchMapping("/{id}")
+    public Enrollment edit(@PathVariable long id, @RequestBody EditInput input) {
+        Enrollment enrollment = get(id);
+        if (input.reference() != null) {
+            enrollment.setReference(input.reference());
+        }
+        if (input.total() != null) {
+            enrollment.setTotal(input.total());
+        }
+        if (input.prepaid() != null) {
+            enrollment.setPrepaid(input.prepaid());
+        }
+        if (input.status() != null) {
+            enrollment.setStatus(input.status());
+        }
+        return repository.save(enrollment);
     }
 }

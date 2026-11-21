@@ -105,3 +105,17 @@ $('cancel-form').addEventListener('submit',event => {
 });
 const initialID = new URLSearchParams(location.search).get('enrollment');
 if (initialID) perform($('lookup-form'),() => loadEnrollment(initialID));
+
+$('welcome').innerHTML = new URLSearchParams(location.search).get('welcome') || 'Вітаємо на навчальних курсах!';
+bind('search-form', async input => {
+    $('search-result').textContent = JSON.stringify(await request('/enrollments/search?reference=' + encodeURIComponent(input.reference.value)),null,2);
+    $('notice').textContent = 'Пошук завершено.';
+});
+bind('edit-form', async input => {
+    if (!enrollment) return;
+    const response = await fetch('/enrollments/' + enrollment.id, {method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({reference:input.reference.value})});
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Не вдалося змінити код.');
+    showEnrollment(data);
+    $('notice').textContent = 'Код змінено.';
+});

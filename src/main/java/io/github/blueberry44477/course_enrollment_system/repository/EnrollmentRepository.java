@@ -8,7 +8,10 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
+import java.util.List;
+import java.util.Map;
+
+public interface EnrollmentRepository extends JpaRepository<Enrollment, Long>, EnrollmentRepositoryCustom {
 
     @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.courseId = :courseId AND e.status IN ('ENROLLED', 'COMPLETED')")
     int countOccupied(@Param("courseId") Long courseId);
@@ -19,4 +22,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @Modifying
     @Query("UPDATE Enrollment e SET e.status = :next, e.refund = :refund WHERE e.id = :id AND e.status = 'ENROLLED'")
     int updateStatus(@Param("id") Long id, @Param("next") EnrollmentStatus next, @Param("refund") long refund);
+
+    // Fix
+//    @Query("SELECT e.id AS id, e.reference AS reference, e.total AS total, e.status AS status FROM Enrollment e WHERE e.reference = :reference")
+//    List<Map<String, Object>> searchByReference(@Param("reference") String reference);
 }
