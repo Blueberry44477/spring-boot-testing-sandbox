@@ -55,7 +55,8 @@ public class EnrollmentServicePropertyTest {
         );
     }
 
-    @Property
+
+    @Property(tries = 300) // generated cases
     void isEligible_shouldSuccess_forCourseRules(
             @ForAll @IntRange(min = 0, max = 120) int age,
             @ForAll @IntRange(min = 0, max = 100) int entryScore,
@@ -153,5 +154,12 @@ public class EnrollmentServicePropertyTest {
         }
     }
 
-
+    // Deterministic Boundary Test
+    // As @Property could theoretically not catch boundary cases
+    @Example
+    void isEligible_shouldBeRight_forLevel3BoundaryCases() {
+        assertFalse(enrollmentService.isEligible(17, 80, 3, true));
+        assertFalse(enrollmentService.isEligible(18, 79, 3, true));
+        assertTrue(enrollmentService.isEligible(18, 80, 3, false));
+    }
 }
