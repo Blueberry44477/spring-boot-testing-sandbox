@@ -173,6 +173,15 @@
 			<version>1.10.2</version>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- Fuzz Testing-->
+		<!-- Source: https://mvnrepository.com/artifact/com.code-intelligence/jazzer-junit -->
+		<dependency>
+			<groupId>com.code-intelligence</groupId>
+			<artifactId>jazzer-junit</artifactId>
+			<version>0.30.0</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
